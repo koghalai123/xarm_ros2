@@ -40,6 +40,8 @@ def launch_setup(context, *args, **kwargs):
     
     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
+    # load_table:=false uses an empty world and spawns the robot at the origin
+    load_table = LaunchConfiguration('load_table', default=True)
     model1300 = LaunchConfiguration('model1300', default=False)
     robot_sn = LaunchConfiguration('robot_sn', default='')
     attach_to = LaunchConfiguration('attach_to', default='world')
@@ -145,15 +147,37 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    use_table = load_table.perform(context).lower() == 'true'
     if gz_type == 'gz':
-        gazebo_world = PathJoinSubstitution([FindPackageShare('xarm_gazebo'), 'worlds', 'table_gz.world'])
-        # ros_gz_sim/launch/gz_sim.launch.py
-        gazebo_launch = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'])),
-            launch_arguments={
-                'gz_args': ' -r -v 3 {} --physics-engine gz-physics-bullet-featherstone-plugin'.format(gazebo_world.perform(context)),
-            }.items(),
-        )
+        world_file = 'table_gz.world' if use_table else 'empty_gz.world'
+        gazebo_world = PathJoinSubstitution([FindPackageShare('xarm_gazebo'), 'worlds', world_file])
+        # Server (-s) and GUI (-g) as separate processes: in combined mode the
+        # sensors render thread and the GUI share one Ogre HLMS registry, and
+        # spawning a camera-equipped robot after the GUI scene exists crashes
+        # the server with "material datablock already exists".
+        gazebo_launch = [
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'])),
+                launch_arguments={
+                    'gz_args': ' -s -r -v 3 {} --physics-engine gz-physics-bullet-featherstone-plugin'.format(gazebo_world.perform(context)),
+                }.items(),
+            ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'])),
+                launch_arguments={
+                    'gz_args': ' -g -v 3',
+                }.items(),
+            ),
+        ]
+        if use_table:
+            spawn_pose_args = [
+                '-x', '-0.2',
+                '-y', '-0.54' if robot_type.perform(context) == 'uf850' else '-0.5',
+                '-z', '1.021',
+                '-Y', '1.571',
+            ]
+        else:
+            spawn_pose_args = ['-x', '0', '-y', '0', '-z', '0', '-Y', '0']
         # gazebo spawn entity node
         gazebo_spawn_entity_node = Node(
             package="ros_gz_sim",
@@ -163,12 +187,7 @@ def launch_setup(context, *args, **kwargs):
                 '-topic', 'robot_description',
                 # '-name', '{}'.format(xarm_type),
                 '-name', 'UF_ROBOT',
-                '-x', '-0.2',
-                '-y', '-0.54' if robot_type.perform(context) == 'uf850' else '-0.5',
-                '-z', '1.021',
-                '-Y', '1.571',
-                # '-allow_renaming', 'true'
-            ],
+            ] + spawn_pose_args,
             parameters=[{'use_sim_time': True}],
         )
         # Gz - ROS Bridge

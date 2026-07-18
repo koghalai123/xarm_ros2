@@ -40,6 +40,7 @@ def launch_setup(context, *args, **kwargs):
     add_bio_gripper = LaunchConfiguration('add_bio_gripper', default=False)
     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
+    load_table = LaunchConfiguration('load_table', default=True)
     add_other_geometry = LaunchConfiguration('add_other_geometry', default=False)
     geometry_type = LaunchConfiguration('geometry_type', default='box')
     geometry_mass = LaunchConfiguration('geometry_mass', default=0.1)
@@ -143,6 +144,7 @@ def launch_setup(context, *args, **kwargs):
             'show_rviz': 'true',
             'no_gui_ctrl': no_gui_ctrl,
             'gz_type': gz_type,
+            'load_table': load_table,
         }.items(),
     )
 
