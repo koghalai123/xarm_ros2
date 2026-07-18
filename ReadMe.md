@@ -58,6 +58,22 @@ For simplified Chinese version: [简体中文版](./ReadMe_cn.md)
 
 - ### 3.3 Install [Gazebo](https://gazebosim.org/docs/harmonic/install_ubuntu/)  
 
+- ### 3.4 Notes for Linux Mint (tested on Mint 22.x + ROS Jazzy)
+  Mint is Ubuntu-based but reports its own codename (e.g. `zara`), which breaks the standard ROS 2 and Gazebo apt setup steps that use `lsb_release -cs` or `$VERSION_CODENAME`. Use the underlying Ubuntu codename instead (`noble` for Mint 22.x):
+  ```bash
+  # Instead of $(lsb_release -cs) / $VERSION_CODENAME, use UBUNTU_CODENAME:
+  UBUNTU_CODENAME=$(. /etc/os-release && echo $UBUNTU_CODENAME)
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $UBUNTU_CODENAME main" | sudo tee /etc/apt/sources.list.d/ros2.list
+  ```
+  The same substitution applies to the Gazebo (packages.osrfoundation.org) apt source. `rosdep` works normally once `ID_LIKE=ubuntu` resolution kicks in; if `rosdep update` complains about an unsupported OS, run it as `ROS_OS_OVERRIDE=ubuntu:24.04:noble rosdep install ...`.
+
+- ### 3.5 Known Gazebo Harmonic pitfalls (this branch contains fixes)
+  These cost significant debugging time on a fresh install — the fixes are committed in this fork, listed here so they don't get reverted when merging upstream:
+  - **World files must declare ALL default system plugins.** A world with *any* explicit `<plugin>` tag loses the implicit defaults. Adding only the Sensors plugin silently removes UserCommands, which kills `/world/<name>/create` and makes robot spawning hang forever; no plugins at all makes spawning work but cameras never publish. The world files here declare all four: Physics, UserCommands, SceneBroadcaster, and Sensors (ogre2).
+  - **Run the gz server and GUI as separate processes** (`gz sim -s` and `gz sim -g`). The combined process crashes with `Ogre ItemIdentityException: material datablock already exists` when a camera-equipped robot spawns after the GUI scene exists (shared HLMS registry).
+  - **Stale gz server processes hang the next launch.** A leftover server still holds the `default` world; `pkill -f "gz sim"` before relaunching.
+  - On hybrid AMD/NVIDIA graphics, repeated EGL errors at GUI startup are harmless but delay the window by ~30 s.
+
 ## 4. How To Use
 
 - ### 4.1 Create a workspace
@@ -74,6 +90,9 @@ For simplified Chinese version: [简体中文版](./ReadMe_cn.md)
     # DO NOT omit "--recursive"，or the source code of dependent submodule will not be downloaded.
     # Pay attention to the use of the -b parameter command branch, $ROS_DISTRO indicates the currently activated ROS version, if the ROS environment is not activated, you need to customize the specified branch (foxy/galactic/humble/jazzy)
     git clone https://github.com/xArm-Developer/xarm_ros2.git --recursive -b $ROS_DISTRO
+
+    # Or, to get this fork with the Lite 6 sim fixes described in section 3.5:
+    git clone https://github.com/koghalai123/xarm_ros2.git --recursive -b lite6-sim-patches
     ```
 
 - ### 4.3 Update "xarm_ros2" repository 
