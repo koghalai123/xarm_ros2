@@ -80,24 +80,24 @@ For simplified Chinese version: [简体中文版](./ReadMe_cn.md)
     ```bash
     # Skip this step if you already have a target workspace
     cd ~
-    mkdir -p dev_ws/src
+    mkdir -p ar4_ws/src
     ```
 
 - ### 4.2 Obtain source code of "xarm_ros2" repository
     ```bash
     # Remember to source ros2 environment settings first
-    cd ~/dev_ws/src
-    # DO NOT omit "--recursive"，or the source code of dependent submodule will not be downloaded.
-    # Pay attention to the use of the -b parameter command branch, $ROS_DISTRO indicates the currently activated ROS version, if the ROS environment is not activated, you need to customize the specified branch (foxy/galactic/humble/jazzy)
-    git clone https://github.com/xArm-Developer/xarm_ros2.git --recursive -b $ROS_DISTRO
-
-    # Or, to get this fork with the Lite 6 sim fixes described in section 3.5:
+    cd ~/ar4_ws/src
+    # Clone this fork (branch lite6-sim-patches, based on jazzy) — it contains the Lite 6 sim fixes described in section 3.5.
+    # DO NOT omit "--recursive", or the source code of dependent submodules will not be downloaded.
     git clone https://github.com/koghalai123/xarm_ros2.git --recursive -b lite6-sim-patches
+
+    # (Original upstream, without the fixes: use the branch matching your ROS version, e.g. -b $ROS_DISTRO)
+    # git clone https://github.com/xArm-Developer/xarm_ros2.git --recursive -b $ROS_DISTRO
     ```
 
 - ### 4.3 Update "xarm_ros2" repository 
     ```bash
-    cd ~/dev_ws/src/xarm_ros2
+    cd ~/ar4_ws/src/xarm_ros2
 
     # If you did not use the --recursive or --recurse-submodules option when cloning, use this command to initialize and update all submodules
     git submodule update --init --recursive
@@ -109,7 +109,7 @@ For simplified Chinese version: [简体中文版](./ReadMe_cn.md)
 - ### 4.4 Install dependencies
     ```bash
     # Remember to source ros2 environment settings first
-    cd ~/dev_ws/src/
+    cd ~/ar4_ws/src/
     rosdep update
     rosdep install --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
     ```
@@ -117,7 +117,7 @@ For simplified Chinese version: [简体中文版](./ReadMe_cn.md)
 - ### 4.5 Build xarm_ros2
     ```bash
     # Remember to source ros2 and moveit2 environment settings first
-    cd ~/dev_ws/
+    cd ~/ar4_ws/
     # build all packages
     colcon build
     
@@ -137,7 +137,7 @@ __Reminder 1: If there are multiple people using ros2 in the current LAN, in ord
 __Reminder 2： Remember to source the environment setup script before running any applications in xarm_ros2__  
 
 ```bash
-cd ~/dev_ws/
+cd ~/ar4_ws/
 source install/setup.bash
 ```
 __Reminder 3： All following instructions will base on xArm6，please use proper parameters or filenames for xArm5 or xArm7__  
@@ -147,7 +147,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
 - ### 5.1 xarm_description
     This package contains robot description files and 3D models of xArm. Models can be displayed in RViz by the following launch file:
     ```bash
-    cd ~/dev_ws/
+    cd ~/ar4_ws/
     # set 'add_gripper=true' to attach xArm gripper model
     # set 'add_vacuum_gripper=true' to attach xArm vacuum gripper model
     # Notice：Only one end_effector can be attached (set to 'true').
@@ -191,7 +191,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - __Launch and test (xArm)__:  
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # launch xarm_driver_node
         ros2 launch xarm_api xarm6_driver.launch.py robot_ip:=192.168.1.117
         # service test
@@ -203,7 +203,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - __Use command line (xArm)__:
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # launch xarm_driver_node:
         ros2 launch xarm_api xarm6_driver.launch.py robot_ip:=192.168.1.117
         
@@ -224,7 +224,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - __Use command line (lite6)__:
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # launch ufactory_driver_node:
         ros2 launch xarm_api lite6_driver.launch.py robot_ip:=192.168.1.161
         
@@ -245,7 +245,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - __Use command line (UFACTORY850)__:
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # launch ufactory_driver_node:
         ros2 launch xarm_api uf850_driver.launch.py robot_ip:=192.168.1.181
         
@@ -270,7 +270,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     This package defines the hardware interface for real xArm control under ros2.  
 
     ```bash
-    cd ~/dev_ws/
+    cd ~/ar4_ws/
     # For xArm(xarm6 as example): set 'add_gripper=true' to attach xArm gripper model
     ros2 launch xarm_controller xarm6_control_rviz_display.launch.py robot_ip:=192.168.1.117 [add_gripper:=true]
 
@@ -287,7 +287,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - 【simulated】Launch moveit, controlling robot in rviz.  
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # For xArm(xarm6 as example): set 'add_gripper=true' to attach xArm gripper model
         ros2 launch xarm_moveit_config xarm6_moveit_fake.launch.py [add_gripper:=true]
 
@@ -301,7 +301,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - 【real arm】Launch moveit, controlling robot in rviz.  
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # For xArm(xarm6 as example): set 'add_gripper=true' to attach xArm gripper model
         ros2 launch xarm_moveit_config xarm6_moveit_realmove.launch.py robot_ip:=192.168.1.117 [add_gripper:=true]
 
@@ -315,7 +315,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - 【Dual simulated】Launch single moveit process, and controlling two xArms in one rviz.  
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # set 'add_gripper=true' to attach xArm gripper model
         # 'add_gripper_1': can separately decide whether to attach gripper for left arm，default for same value with 'add_gripper'
         # 'add_gripper_2': can separately decide whether to attach gripper for right arm，default for same value with 'add_gripper'
@@ -335,7 +335,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     - 【Dual real arm】Launch single moveit process, and controlling two xArms in one rviz.  
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # 'robot_ip_1': IP address of left arm
         # 'robot_ip_2': IP address of right arm
         # set 'add_gripper=true' to attach xArm gripper model
@@ -358,7 +358,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     This package provides functions for controlling xArm (simulated or real arm) through moveit API  
 
     ```bash
-    cd ~/dev_ws/
+    cd ~/ar4_ws/
     # 【simulated xArm】launch xarm_planner_node
     ros2 launch xarm_planner xarm6_planner_fake.launch.py [add_gripper:=true]
     # 【real xArm】launch xarm_planner_node
@@ -401,7 +401,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     
     - Testing xarm on gazebo independently:
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # For xArm (xarm6 here):
         ros2 launch xarm_gazebo xarm6_beside_table_gazebo.launch.py
 
@@ -414,7 +414,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
 
     - Simulation with moveit+gazebo (xArm controlled by moveit).
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # For xArm (xarm6 here):
         ros2 launch xarm_moveit_config xarm6_moveit_gazebo.launch.py
 
@@ -436,7 +436,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
         - buttons Y and A for controlling second last joint.  
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # XBOX Wired -> joystick_type=1
         # XBOX Wireless -> joystick_type=2
         # For controlling simulated xArm:
@@ -462,7 +462,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
         - Right button clicked for just ROLL/PITCH/YAW adjustment  
 
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # For controlling simulated xArm:
         ros2 launch xarm_moveit_servo xarm_moveit_servo_fake.launch.py joystick_type:=3
         # Or controlling simulated Lite6:
@@ -480,7 +480,7 @@ __Reminder 4: The <hw_ns> described below is replaced with the actual one, the x
     
     - Controlling with __PC keyboard__:
         ```bash
-        cd ~/dev_ws/
+        cd ~/ar4_ws/
         # For controlling simulated xArm:
         ros2 launch xarm_moveit_servo xarm_moveit_servo_fake.launch.py dof:=6
         # Or controlling simulated Lite6:
