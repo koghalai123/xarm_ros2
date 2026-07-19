@@ -361,13 +361,13 @@
         <topic>${prefix}camera/infra2/image_raw</topic>
       </sensor>
     </gazebo>
-    <gazebo>
-      <plugin
-        filename="libgz-sim-sensors-system.so"
-        name="gz::sim::systems::Sensors">
-        <render_engine>ogre2</render_engine>
-      </plugin>
-    </gazebo>
+    <!-- NOTE: the gz-sim-sensors-system is intentionally NOT declared here.
+         The world (empty_gz.world / table_gz.world) already loads a single
+         world-level Sensors system, which renders every spawned camera sensor.
+         Declaring a second Sensors system on the model spawns a second render
+         thread that calls CreateScene("scene") again -> "Scene already exists"
+         -> null-scene segfault in SensorsPrivate::WaitForInit (crashes the gz
+         server, so controllers never spawn and joint_states never publishes). -->
   </xacro:macro>
 
 </robot>
