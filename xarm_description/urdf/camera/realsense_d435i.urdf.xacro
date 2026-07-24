@@ -6,15 +6,15 @@
     <xacro:property name="M_PI" value="3.1415926535897931" />
     
     <link name="${prefix}link_eef">
-      <xacro:common_link_visual 
-        mesh_filename="camera/realsense/visual/d435_with_cam_stand"  
-        origin_xyz="0 0 0" 
-        origin_rpy="0 0 0"
+      <xacro:common_link_visual
+        mesh_filename="camera/realsense/visual/d435_with_cam_stand"
+        origin_xyz="0 0 0"
+        origin_rpy="0 0 ${-M_PI/2}"
         material_name="${prefix}Silver" />
-      <xacro:common_link_collision 
-        mesh_filename="camera/realsense/collision/d435_with_cam_stand"  
-        origin_xyz="0 0 0" 
-        origin_rpy="0 0 0" />
+      <xacro:common_link_collision
+        mesh_filename="camera/realsense/collision/d435_with_cam_stand"
+        origin_xyz="0 0 0"
+        origin_rpy="0 0 ${-M_PI/2}" />
     </link>
 
     <xacro:if value="${add_d435i_links}">
@@ -40,7 +40,11 @@
       <joint name="${prefix}camera_link_joint" type="fixed">
         <parent link="${prefix}link_eef" />
         <child link="${prefix}camera_link" />
-        <origin xyz="0.06746 -0.0175 0.0237" rpy="${M_PI} ${-M_PI/2} 0" />
+        <!-- nominal mount was xyz="0.015 -0.06 0.03"; shifted by the
+             calibrate_camera_offset delta [0.0022 -0.019 -0.0257] (link_eef
+             frame, 2026-07-24) so the color optical frame lands at the
+             measured [0.0022 -0.079 0.0043] -->
+        <origin xyz="0.0182 -0.0761 0.0061" rpy="${M_PI/2} ${-M_PI/2} 0" />
       </joint>
 
       <joint name="${prefix}camera_depth_joint" type="fixed">
