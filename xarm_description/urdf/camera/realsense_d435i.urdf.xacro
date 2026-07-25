@@ -40,11 +40,8 @@
       <joint name="${prefix}camera_link_joint" type="fixed">
         <parent link="${prefix}link_eef" />
         <child link="${prefix}camera_link" />
-        <!-- nominal mount was xyz="0.015 -0.06 0.03"; shifted by the
-             calibrate_camera_offset delta [0.0022 -0.019 -0.0257] (link_eef
-             frame, 2026-07-24) so the color optical frame lands at the
-             measured [0.0022 -0.079 0.0043] -->
-        <origin xyz="0.0182 -0.0761 0.0061" rpy="${M_PI/2} ${-M_PI/2} 0" />
+        <!-- For the xarm6Lite <origin xyz="0.0182 -0.0761 0.0061" rpy="${M_PI/2} ${-M_PI/2} 0" /> -->
+        <origin xyz="0.0186 -0.0622 0.0321" rpy="${M_PI/2} ${-M_PI/2} 0" />
       </joint>
 
       <joint name="${prefix}camera_depth_joint" type="fixed">
