@@ -61,11 +61,29 @@ For simplified Chinese version: [简体中文版](./ReadMe_cn.md)
 - ### 3.4 Notes for Linux Mint (tested on Mint 22.x + ROS Jazzy)
   Mint is Ubuntu-based but reports its own codename (e.g. `zara`), which breaks the standard ROS 2 and Gazebo apt setup steps that use `lsb_release -cs` or `$VERSION_CODENAME`. Use the underlying Ubuntu codename instead (`noble` for Mint 22.x):
   ```bash
-  # Instead of $(lsb_release -cs) / $VERSION_CODENAME, use UBUNTU_CODENAME:
-  UBUNTU_CODENAME=$(. /etc/os-release && echo $UBUNTU_CODENAME)
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $UBUNTU_CODENAME main" | sudo tee /etc/apt/sources.list.d/ros2.list
+grep -q 'ROS_OS_OVERRIDE=.*ubuntu:.*:.*' ~/.bashrc || cat <<'EOF' >> ~/.bashrc
+
+# On Linux Mint, force rosdep to resolve as Ubuntu.
+if [ -r /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "linuxmint" ]; then
+        _mint_ubuntu_codename="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+        if [ -n "$_mint_ubuntu_codename" ]; then
+            export ROS_OS_OVERRIDE="ubuntu:$_mint_ubuntu_codename:$_mint_ubuntu_codename"
+        fi
+        unset _mint_ubuntu_codename
+    fi
+fi
+EOF
   ```
   The same substitution applies to the Gazebo (packages.osrfoundation.org) apt source. `rosdep` works normally once `ID_LIKE=ubuntu` resolution kicks in; if `rosdep update` complains about an unsupported OS, run it as `ROS_OS_OVERRIDE=ubuntu:24.04:noble rosdep install ...`.
+
+  **Duplicate ROS apt source (`E: Conflicting values set for option Signed-By`):** if ROS 2 was installed via the `ros-apt-source` package (which creates `/etc/apt/sources.list.d/ros2.sources` with the signing key embedded), *also* adding the repo manually per the ROS install docs creates a second entry (`ros2.list`) with a different `Signed-By`, and apt refuses to read **any** sources. Keep the package-managed one and delete the manual one:
+  ```bash
+  # Only if BOTH ros2.sources and ros2.list exist:
+  sudo rm /etc/apt/sources.list.d/ros2.list
+  sudo apt update
+  ```
 
 - ### 3.5 Known Gazebo Harmonic pitfalls (this branch contains fixes)
   These cost significant debugging time on a fresh install — the fixes are committed in this fork, listed here so they don't get reverted when merging upstream:
@@ -112,6 +130,19 @@ For simplified Chinese version: [简体中文版](./ReadMe_cn.md)
     cd ~/ar4_ws/src/
     rosdep update
     rosdep install --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y
+    ```
+
+    On ROS Jazzy (including Linux Mint, see section 3.4), the plain command above fails with
+    `Cannot locate rosdep definition for [sdformat14]` (and then `[gz-sim8]`): those keys do not
+    exist in the rosdep database, but the libraries are already provided by the Jazzy vendor
+    packages `ros-jazzy-sdformat-vendor` and `ros-jazzy-gz-sim-vendor` (pulled in with
+    `ros-jazzy-ros-gz-sim`). Skip the keys instead. `PIP_BREAK_SYSTEM_PACKAGES=1` is needed for
+    rosdep's pip dependencies (e.g. `transforms3d`) on Python ≥ 3.11 (PEP 668):
+    ```bash
+    cd ~/ar4_ws/src/
+    rosdep update
+    PIP_BREAK_SYSTEM_PACKAGES=1 rosdep install --from-paths . --ignore-src \
+        --rosdistro $ROS_DISTRO -y --skip-keys "sdformat14 gz-sim8"
     ```
 
 - ### 4.5 Build xarm_ros2

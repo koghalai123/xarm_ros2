@@ -365,9 +365,13 @@
          The world (empty_gz.world / table_gz.world) already loads a single
          world-level Sensors system, which renders every spawned camera sensor.
          Declaring a second Sensors system on the model spawns a second render
-         thread that calls CreateScene("scene") again -> "Scene already exists"
-         -> null-scene segfault in SensorsPrivate::WaitForInit (crashes the gz
-         server, so controllers never spawn and joint_states never publishes). -->
+         thread that races the first to create the render scene; observed
+         failures include CreateScene("scene") reporting "Scene already exists"
+         -> null-scene segfault in SensorsPrivate::WaitForInit, and
+         Ogre::ItemIdentityException "material datablock already exists".
+         Either way the gz server dies, so controllers never spawn and
+         joint_states never publishes. -->
+
   </xacro:macro>
 
 </robot>
