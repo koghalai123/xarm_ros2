@@ -39,12 +39,25 @@
       </xacro:if>
     </group>
     <!-- GROUP STATES, Purpose, Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms' -->
+    <!-- lite6-sim-patches: home is no longer the all-zero pose. At zeros link6
+         sits at z=0.112 m with the tool pointing straight down, which puts the
+         stock gripper's link_tcp at z=-0.060 — 6 cm INTO the floor. Closing the
+         gripper there drives the fingers through the ground, and nothing can
+         prevent it: the gripper closes without the arm moving, so the planner
+         has no joint to back off.
+         This is that pose lifted 10 cm in +z (link6 0.212, link_tcp +0.040, so
+         ~4 cm of clearance) with x/y and the tool axis unchanged: joint2/joint5
+         pitch by opposite amounts so the tool still points straight down, and
+         joint3 takes up the lateral drift (well inside its 0.19198 upper stop).
+         Kept in sync with the initial_value params in
+         xarm_description/urdf/xarm6/xarm6.ros2_control.xacro so the sim spawns
+         here too. -->
     <group_state name="home" group="${prefix}xarm6">
       <joint name="${prefix}joint1" value="0" />
-      <joint name="${prefix}joint2" value="0" />
-      <joint name="${prefix}joint3" value="0" />
+      <joint name="${prefix}joint2" value="-0.7576" />
+      <joint name="${prefix}joint3" value="0.0203" />
       <joint name="${prefix}joint4" value="0" />
-      <joint name="${prefix}joint5" value="0" />
+      <joint name="${prefix}joint5" value="0.7373" />
       <joint name="${prefix}joint6" value="0" />
     </group_state>
     <group_state name="hold-up" group="${prefix}xarm6">

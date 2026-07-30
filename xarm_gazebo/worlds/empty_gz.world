@@ -1,11 +1,41 @@
 <?xml version="1.0" ?>
 <sdf version="1.4">
   <world name="default">
-    <include>
-      <uri>
-        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground Plane
-      </uri>
-    </include>
+    <!-- Ground plane, inlined instead of the Fuel "Ground Plane" model so its
+         visual can be SEE-THROUGH. Hand-taught / scanned marker poses can land
+         a centimetre or two under z=0 (the arm's base_link origin is not exactly
+         the bench surface), and a printer placed from such a marker puts its
+         ArUco plate just below the floor. Against the opaque Fuel plane the
+         camera then sees nothing and every scan of that marker fails. At alpha
+         0.25 the tag still reads through the floor while the plane stays
+         visible as a reference. Collision is unchanged. -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <transparency>0.75</transparency>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 0.25</ambient>
+            <diffuse>0.8 0.8 0.8 0.25</diffuse>
+            <specular>0.8 0.8 0.8 0.25</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun

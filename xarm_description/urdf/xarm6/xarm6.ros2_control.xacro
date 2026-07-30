@@ -10,7 +10,17 @@
     joint3_lower_limit:=${-3.927}  joint3_upper_limit:=${0.19198}
     joint4_lower_limit:=${-2.0*pi}  joint4_upper_limit:=${2.0*pi}
     joint5_lower_limit:=${-1.69297}  joint5_upper_limit:=${pi}
-    joint6_lower_limit:=${-2.0*pi}  joint6_upper_limit:=${2.0*pi}">
+    joint6_lower_limit:=${-2.0*pi}  joint6_upper_limit:=${2.0*pi}
+    joint1_home:=0 joint2_home:=${-0.7576} joint3_home:=0.0203
+    joint4_home:=0 joint5_home:=0.7373 joint6_home:=0">
+    <!-- lite6-sim-patches: joint*_home is the pose gz spawns the arm at, via the
+         initial_value params on each position state interface below. It MUST match
+         the 'home' group_state in xarm_moveit_config/srdf/_xarm6_macro.srdf.xacro
+         (the all-zero pose lifted 10 cm — at zeros the stock gripper's link_tcp
+         is 6 cm below the floor, so closing it there drives the fingers into the
+         ground) — otherwise the arm spawns somewhere RViz's home button will not
+         return it to. Only mock/gz hardware reads initial_value; the real
+         UFRobotSystemHardware plugin reports actual encoder positions. -->
     <ros2_control name="${prefix}${ros2_control_plugin}" type="system">
       <hardware>
         <plugin>${ros2_control_plugin}</plugin>
@@ -45,7 +55,11 @@
           <param name="min">-3.14</param>
           <param name="max">3.14</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <!-- sim start pose; ignored by the real UF plugin (see the
+               joint*_home params above) -->
+          <param name="initial_value">${joint1_home}</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <!-- <state_interface name="effort"/> -->
       </joint>
@@ -58,7 +72,11 @@
           <param name="min">-3.14</param>
           <param name="max">3.14</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <!-- sim start pose; ignored by the real UF plugin (see the
+               joint*_home params above) -->
+          <param name="initial_value">${joint2_home}</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <!-- <state_interface name="effort"/> -->
       </joint>
@@ -71,7 +89,11 @@
           <param name="min">-3.14</param>
           <param name="max">3.14</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <!-- sim start pose; ignored by the real UF plugin (see the
+               joint*_home params above) -->
+          <param name="initial_value">${joint3_home}</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <!-- <state_interface name="effort"/> -->
       </joint>
@@ -84,7 +106,11 @@
           <param name="min">-3.14</param>
           <param name="max">3.14</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <!-- sim start pose; ignored by the real UF plugin (see the
+               joint*_home params above) -->
+          <param name="initial_value">${joint4_home}</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <!-- <state_interface name="effort"/> -->
       </joint>
@@ -97,7 +123,11 @@
           <param name="min">-3.14</param>
           <param name="max">3.14</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <!-- sim start pose; ignored by the real UF plugin (see the
+               joint*_home params above) -->
+          <param name="initial_value">${joint5_home}</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <!-- <state_interface name="effort"/> -->
       </joint>
@@ -110,7 +140,11 @@
           <param name="min">-3.14</param>
           <param name="max">3.14</param>
         </command_interface>
-        <state_interface name="position"/>
+        <state_interface name="position">
+          <!-- sim start pose; ignored by the real UF plugin (see the
+               joint*_home params above) -->
+          <param name="initial_value">${joint6_home}</param>
+        </state_interface>
         <state_interface name="velocity"/>
         <!-- <state_interface name="effort"/> -->
       </joint>
