@@ -8,18 +8,16 @@
          ArUco plate just below the floor. Against the opaque Fuel plane the
          camera then sees nothing and every scan of that marker fails. At alpha
          0.25 the tag still reads through the floor while the plane stays
-         visible as a reference. Collision is unchanged. -->
+         visible as a reference.
+         VISUAL-ONLY on purpose: no collision element. Scanned marker poses a
+         couple of cm below z=0 mean scrape waypoints can dip the gripper under
+         the floor; a solid floor then wedges the arm and the trajectory
+         controller aborts (CONTROL_FAILED). When floor physics IS wanted,
+         runner_common.add_gz_floor_collision spawns a separate static
+         collision box (collisions=True runs do this automatically). -->
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
-        <collision name="collision">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>100 100</size>
-            </plane>
-          </geometry>
-        </collision>
         <visual name="visual">
           <transparency>0.75</transparency>
           <geometry>
